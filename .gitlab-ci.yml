@@ -1,0 +1,24 @@
+image: python:3.9
+
+variables:
+  IMAGE_VERSION: v1.0.0
+  WORK_DIR: .
+  NODE_ENV: development
+  DOCKER_DRIVER: overlay2
+  DOCKER_FILE: Dockerfile
+  DOCKER_BUILD_CONTEXT: .
+  DOCKER_IMAGE: fullstack-recommender:${IMAGE_VERSION}
+cache:
+  key: '$CI_COMMIT_REF_SLUG'
+stages:
+  - deploy
+Deploy:
+  stage: deploy
+  only:
+    - deploy
+  tags:
+    - fullstack-api
+  script:
+    - docker stop $(docker ps -aq) || true
+    - docker build -t ${DOCKER_IMAGE} .
+    - docker run -it -d -p 8080:80 --restart=unless-stopped ${DOCKER_IMAGE}
